@@ -259,6 +259,12 @@ fn main() {
         .status()
         .unwrap();
 
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["systemctl", "enable", "NetworkManager"])
+        .status()
+        .unwrap();
+
     println!("Minimarch installation complete!");
     println!("Here is an overview of what have been done:");
     println!("Coming soon...");
