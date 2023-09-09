@@ -1,6 +1,6 @@
 use inquire::{Confirm, MultiSelect, Select, Text};
 use serde_json::Value;
-use std::{process::Command, fs::File, io::Write};
+use std::{fs::File, io::Write, process::Command};
 
 fn main() {
     // Internet
@@ -151,6 +151,11 @@ fn main() {
         .prompt()
         .unwrap();
 
+    Command::new("pacman")
+        .args(["-Sy", "archlinux-keyring"])
+        .status()
+        .unwrap();
+
     Command::new("pacstrap")
         .arg("/mnt")
         .args(ans)
@@ -175,6 +180,8 @@ fn main() {
 
     let mut file = File::create("/mnt/etc/locale.conf").unwrap();
     file.write(b"LANG=en_US.UTF-8").unwrap();
+
+    Command::new("locale-gen").status().unwrap();
 
     let hostname = Text::new("hostname:").prompt().unwrap();
 
