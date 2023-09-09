@@ -1,6 +1,6 @@
 use inquire::{Confirm, MultiSelect, Select, Text};
 use serde_json::Value;
-use std::process::Command;
+use std::{process::Command, fs::File, io::Write};
 
 fn main() {
     // Internet
@@ -173,16 +173,13 @@ fn main() {
         .status()
         .unwrap();
 
-    Command::new("echo")
-        .args(["LANG=en_US.UTF-8", ">", "/mnt/etc/locale.conf"])
-        .status()
-        .unwrap();
+    let mut file = File::create("/mnt/etc/locale.conf").unwrap();
+    file.write(b"LANG=en_US.UTF-8").unwrap();
 
     let hostname = Text::new("hostname:").prompt().unwrap();
-    Command::new("echo")
-        .args([&hostname, ">", "/mnt/etc/hostname"])
-        .status()
-        .unwrap();
+
+    let mut file = File::create("/mnt/etc/hostname").unwrap();
+    file.write(hostname.as_bytes()).unwrap();
 
     let hosts = format!(
         "
@@ -191,10 +188,8 @@ fn main() {
 127.0.1.1   {hostname}.localdomain  {hostname}"
     );
 
-    Command::new("echo")
-        .args([&hosts, ">", "/mnt/etc/hosts"])
-        .status()
-        .unwrap();
+    let mut file = File::create("/mnt/etc/hosts").unwrap();
+    file.write(hosts.as_bytes()).unwrap();
 
     Command::new("arch-chroot")
         .arg("/mnt")
