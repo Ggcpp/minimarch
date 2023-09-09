@@ -1,4 +1,4 @@
-use inquire::{Confirm, MultiSelect, Select};
+use inquire::{Confirm, MultiSelect, Select, Text};
 use serde_json::Value;
 use std::process::Command;
 
@@ -144,6 +144,7 @@ fn main() {
         "networkmanager",
         "dhcpcd",
         "neovim",
+        "nvidia",
     ];
     let ans = MultiSelect::new("New system packages:", options)
         .with_default(&[0, 1, 2, 3, 4, 5, 6])
@@ -168,8 +169,100 @@ fn main() {
     // Chroot
     Command::new("arch-chroot")
         .arg("/mnt")
+        .args(["nvim", "/etc/locale.gen"])
         .status()
         .unwrap();
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["echo", "LANG=en_US.UTF-8", ">", "/etc/locale.conf"])
+        .status()
+        .unwrap();
+
+    let hostname = Text::new("hostname:").prompt().unwrap();
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["echo", &hostname, ">", "/etc/hostname"])
+        .status()
+        .unwrap();
+
+    let hosts = format!(
+        "
+127.0.0.1   localhost
+::1         localhost
+127.0.1.1   {hostname}.localdomain  {hostname}"
+    );
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["echo", &hosts, ">", "/etc/hosts"])
+        .status()
+        .unwrap();
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .arg("passwd")
+        .status()
+        .unwrap();
+
+    let options = vec!["grub", "efibootmgr", "os-prober"];
+    let ans = MultiSelect::new("boot config packages:", options)
+        .with_default(&[0, 1, 2])
+        .prompt()
+        .unwrap();
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["pacman", "-S"])
+        .args(ans)
+        .status()
+        .unwrap();
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args([
+            "grub-install",
+            "--target=x86_64-efi",
+            "--efi-directory=/boot",
+            "--bootloader-id=GRUB",
+        ])
+        .status()
+        .unwrap();
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["nvim", "/etc/default/grub"])
+        .status()
+        .unwrap();
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["grub-mkconfig", "-o", "/boot/grub/grub.cfg"])
+        .status()
+        .unwrap();
+
+    let username = Text::new("username").prompt().unwrap();
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["useradd", "-m", "-g", "wheel", &username])
+        .status()
+        .unwrap();
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["passwd", &username])
+        .status()
+        .unwrap();
+
+    Command::new("arch-chroot")
+        .arg("/mnt")
+        .args(["nvim", "/etc/sudoers"])
+        .status()
+        .unwrap();
+
+    println!("Minimarch installation complete!");
+    println!("Here is an overview of what have been done:");
+    println!("Coming soon...");
 }
 
 // ping google.com (check, if not ok, nmtui or smth)
