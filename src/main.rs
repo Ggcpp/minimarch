@@ -173,16 +173,14 @@ fn main() {
         .status()
         .unwrap();
 
-    Command::new("arch-chroot")
-        .arg("/mnt")
-        .args(["echo", "LANG=en_US.UTF-8", ">", "/etc/locale.conf"])
+    Command::new("echo")
+        .args(["LANG=en_US.UTF-8", ">", "/mnt/etc/locale.conf"])
         .status()
         .unwrap();
 
     let hostname = Text::new("hostname:").prompt().unwrap();
-    Command::new("arch-chroot")
-        .arg("/mnt")
-        .args(["echo", &hostname, ">", "/etc/hostname"])
+    Command::new("echo")
+        .args([&hostname, ">", "/mnt/etc/hostname"])
         .status()
         .unwrap();
 
@@ -193,9 +191,8 @@ fn main() {
 127.0.1.1   {hostname}.localdomain  {hostname}"
     );
 
-    Command::new("arch-chroot")
-        .arg("/mnt")
-        .args(["echo", &hosts, ">", "/etc/hosts"])
+    Command::new("echo")
+        .args([&hosts, ">", "/mnt/etc/hosts"])
         .status()
         .unwrap();
 
