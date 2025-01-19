@@ -23,3 +23,7 @@
 5. When the file ```/etc/default/grub``` opens up, set the ```GRUB_TIMEOUT``` to whatever (```-1``` means no timeout) and uncomment ```GRUB_DISABLE_OS_PROBER``` is you are dual booting
 6. When the file ```/etc/sudoers``` opens up, uncomment ```%wheel ALL=(ALL:ALL) ALL```
 7. If the installation in complete, you can ```reboot```
+
+## Bonus
+
+After reboot, you can set the timezone with ```timedatectl set-timezone <Tab to see timezones>```
